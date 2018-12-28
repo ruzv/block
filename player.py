@@ -50,7 +50,8 @@ class inventory:
                 self.inventory_item_amounts[i], self.pick_up_item_amount = self.pick_up_item_amount, self.inventory_item_amounts[i]
 
     def update(self):
-        pass
+        print("hell0")
+        print("dosi")
 
     def draw_inventory(self, x, y):
         s.inventory(x, y, self.surface)
