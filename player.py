@@ -7,22 +7,18 @@ import math
 class inventory:
 
     inventory_size = 25
-
     inventory_item_ids = ["e" for i in range(inventory_size)]
     inventory_item_amounts = [0 for i in range(inventory_size)]
 
-    is_inventory_open = False
-    is_inventory_currsor = False
-
     inventory_currsor_x = 0
     inventory_currsor_y = 0
+    is_inventory_open = False
+    inventory_currsor_pos = None
 
     pick_up_item_id = "e"
     pick_up_item_amount = 0
 
-    inventory_currsor = 0
     hotbar_currsor = 0
-
 
     def __init__(self, surface, items):
         self.surface = surface
@@ -40,44 +36,83 @@ class inventory:
                 self.inventory_item_amounts[i] = 1
                 return None
 
-
     def pick_up_item(self):
         if self.is_inventory_open:
-            if self.inventory_currsor_x >= 0 and self.inventory_currsor_x <= 4 and self.inventory_currsor_y >= 0 and self.inventory_currsor_y <= 3:
-                print("hello")
+            if self.inventory_currsor_pos == "i":
                 i = (self.inventory_currsor_y*5) + self.inventory_currsor_x+5
+            elif self.inventory_currsor_pos == "h":
+                i = self.inventory_currsor_x
+
+            if self.inventory_item_ids[i] == self.pick_up_item_id and self.pick_up_item_id != "e":
+                self.inventory_item_amounts[i] += self.pick_up_item_amount
+                ms = self.items.get_item_by_id(self.pick_up_item_id).max_stack
+                if self.inventory_item_amounts[i] > ms:
+                    self.pick_up_item_amount = self.inventory_item_amounts[i] - ms
+                    self.inventory_item_amounts[i] = ms
+                else:
+                    self.pick_up_item_id = "e"
+                    self.pick_up_item_amount = 0
+            else:
                 self.inventory_item_ids[i], self.pick_up_item_id = self.pick_up_item_id, self.inventory_item_ids[i]
                 self.inventory_item_amounts[i], self.pick_up_item_amount = self.pick_up_item_amount, self.inventory_item_amounts[i]
 
     def update(self):
-        print("hell0")
-        print("dosi")
+        if self.is_inventory_open:
+            mx, my = pygame.mouse.get_pos()
+            if mx >= 1054 and my >= 20 and mx <= 1260 and my <= 185:# inventory
+                mx -= 1056
+                my -= 22
+                self.inventory_currsor_pos = "i"
+                self.inventory_currsor_x = int(mx/41)
+                self.inventory_currsor_y = int(my/41)
+            elif mx >= 1054 and my >= 205 and mx <= 1260 and my <= 247:# hotbar
+                mx -= 1056
+                my -= 207
+                self.inventory_currsor_pos = "h"
+                self.inventory_currsor_x = int(mx/41)
+                self.inventory_currsor_y = int(my/41)
+            else:
+                self.inventory_currsor_pos = None
 
     def draw_inventory(self, x, y):
         s.inventory(x, y, self.surface)
         i = 5
-        mx, my = pygame.mouse.get_pos()
-        mx -= 1053
-        my -= 20
-        self.inventory_currsor_x = int(mx/41)
-        self.inventory_currsor_y = int(my/41)
         for yi in range(4):
             for xi in range(5):
-                if xi == self.inventory_currsor_x and yi == self.inventory_currsor_y:
-                    self.draw_inventory_currsor(x+(41*xi), y+(41*yi))
-                elif self.inventory_item_ids[i] != "e":
-                    self.items.get_item_by_id(self.inventory_item_ids[i]).sprite(x+6+(xi*41), y+6+(yi*41), self.surface, self.inventory_item_amounts[i])
+                if self.inventory_currsor_pos == "i":
+                    if xi != self.inventory_currsor_x or yi != self.inventory_currsor_y:
+                        if self.inventory_item_ids[i] != "e":
+                            self.items.get_item_by_id(self.inventory_item_ids[i]).sprite(x+6+(xi*41), y+6+(yi*41), self.surface, self.inventory_item_amounts[i])
+                else:
+                    if self.inventory_item_ids[i] != "e":
+                        self.items.get_item_by_id(self.inventory_item_ids[i]).sprite(x+6+(xi*41), y+6+(yi*41), self.surface, self.inventory_item_amounts[i])
                 i += 1
 
     def draw_inventory_currsor(self, x, y):
-        if self.pick_up_item_id == "e":
-            s.inventory_currsor_empty(x, y, self.surface)
-            i = (self.inventory_currsor_y*5) + self.inventory_currsor_x+5
-            if self.inventory_item_ids[i] != "e":
-                self.items.get_item_by_id(self.inventory_item_ids[i]).sprite(x+6, y+6, self.surface, self.inventory_item_amounts[i])
-        else:
-            s.inventory_currsor_full(x, y, self.surface)
-            self.items.get_item_by_id(self.pick_up_item_id).sprite(x+6, y+6, self.surface, self.pick_up_item_amount)
+        if self.inventory_currsor_pos == "i":
+            x = (self.inventory_currsor_x*41)+x
+            y = (self.inventory_currsor_y*41)+y
+            if self.pick_up_item_id == "e":
+                s.inventory_currsor_empty(x, y, self.surface)
+                i = (self.inventory_currsor_y*5) + self.inventory_currsor_x+5
+                if self.inventory_item_ids[i] != "e":
+                    self.items.get_item_by_id(self.inventory_item_ids[i]).sprite(x+6, y+6, self.surface, self.inventory_item_amounts[i])
+            else:
+                s.inventory_currsor_full(x, y, self.surface)
+                self.items.get_item_by_id(self.pick_up_item_id).sprite(x+6, y+6, self.surface, self.pick_up_item_amount)
+
+
+        elif self.inventory_currsor_pos == "h":
+            x = (self.inventory_currsor_x*41)+x
+            y = (self.inventory_currsor_y*41)+y+185
+            if self.pick_up_item_id == "e":
+                s.inventory_currsor_empty(x, y, self.surface)
+                i = self.inventory_currsor_x
+                if self.inventory_item_ids[i] != "e":
+                    self.items.get_item_by_id(self.inventory_item_ids[i]).sprite(x+6, y+6, self.surface, self.inventory_item_amounts[i])
+            else:
+                s.inventory_currsor_full(x, y, self.surface)
+                self.items.get_item_by_id(self.pick_up_item_id).sprite(x+6, y+6, self.surface, self.pick_up_item_amount)
 
     def draw_hotbar(self, x, y):
         s.hotbar(x, y, self.surface)
@@ -91,6 +126,7 @@ class inventory:
         if self.is_inventory_open:
             self.draw_inventory(1054, 20)
             self.draw_hotbar(1054, 205)
+            self.draw_inventory_currsor(1054, 20)
         else:
             self.draw_hotbar(1054, 20)
 
@@ -265,20 +301,15 @@ class player:
                 self.get_screen_pos()
                 self.is_jumping = False
 
-
-
     def update(self):
         self.is_falling()
         self.gravity()
         self.jumping()
         self.move_horizontaly()
 
+        self.inventory.update()
+
         self.get_cursor_pos()
-
-        # for i, a in zip(self.inventory.inventory_item_ids, self.inventory.inventory_item_amounts):
-        #     print(i, a, end=' ')
-        # print()
-
 
     def draw_cursor(self):
         pygame.draw.line(self.surface, (0, 0, 0), [self.screen_pos_x+20, self.screen_pos_y+20], [self.currsor_pos_x, self.currsor_pos_y], 4)

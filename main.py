@@ -7,13 +7,10 @@ import player as p
 pygame.init()
 display = pygame.display.set_mode([1280, 720])
 pygame.display.set_caption("7_day_chalange")
-
 clock = pygame.time.Clock()
-
 
 world = w.world(display)
 player = p.player(display, world)
-
 
 que = []    
 max_que_len = 4
@@ -70,8 +67,6 @@ def event_handler():
             if p[0] != 1 and "l_mouse" in que:
                 que.remove("l_mouse")
 
-
-
     if "a" in que:
         player.is_moving_left = True
     else:
@@ -107,11 +102,6 @@ def draw():
     player.draw()
     player.draw_cursor()
     player.inventory.draw()
-
-    #asdp.s.hot_bar_currsor(100, 100, display)
-    # p.s.inventory(958, 10, display)
-    # p.s.hot_bar(958, 200, display)
-    # p.s.dirt_item(1005, 100, display, 10)
 
     pygame.display.update()
 
