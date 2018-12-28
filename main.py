@@ -80,6 +80,7 @@ def event_handler():
 
     if "space" in que:
         player.start_jumping()
+
     else:
         player.is_jumping = False
 
@@ -93,7 +94,7 @@ def event_handler():
 
 def update():
     event_handler()
-
+    world.update()
     player.update()
 
 def draw():

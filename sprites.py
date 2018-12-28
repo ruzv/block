@@ -13,15 +13,27 @@ def air(x, y, surface):
     pass
 
 def dirt(x, y, surface):
-    pygame.draw.rect(surface, (77, 40, 0), [x, y, 40, 40])
+    pygame.draw.rect(surface, (79, 60, 42), [x, y, 40, 40])
+    #77, 40, 0
 
 def grass(x, y, surface):
-    pygame.draw.rect(surface, (77, 40, 0), [x, y, 40, 40])
-    pygame.draw.rect(surface, (51, 102, 0), [x, y, 40, 8])
+    dirt(x, y, surface)
+    pygame.draw.rect(surface, (51, 102, 0), [x, y, 40, 10])
 
 def stone(x, y, surface):
     pygame.draw.rect(surface, (64, 64, 64), [x, y, 40, 40])
 
+def sand(x, y, surface):
+    pygame.draw.rect(surface, (200, 200, 0), [x, y, 40, 40])
+
+def water(x, y, surface):
+    pygame.draw.rect(surface, (51, 102, 255), [x, y, 40, 40])
+
+def tree_leafes(x, y, surface):
+    pygame.draw.rect(surface, (23, 53, 18), [x, y, 40, 40])
+
+def tree_stump(x, y, surface):
+    pygame.draw.rect(surface, (86, 47, 14), [x+10, y, 20, 40])
 
 # items
 
@@ -57,4 +69,9 @@ def dirt_item(x, y, surface, amount):
 def stone_item(x, y, surface, amount):
     t = font.render(str(amount), True, (0, 0, 0))
     pygame.draw.rect(surface, (64, 64, 64), [x, y, 30, 30])
+    surface.blit(t, [x+20, y+20])
+
+def sand_item(x, y, surface, amount):
+    t = font.render(str(amount), True, (0, 0, 0))
+    pygame.draw.rect(surface, (200, 200, 0), [x, y, 30, 30])
     surface.blit(t, [x+20, y+20])

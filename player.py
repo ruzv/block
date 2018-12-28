@@ -218,6 +218,24 @@ class player:
         if self.world.loaded_map[y][x] == self.world.blocks.air.id and self.inventory.inventory_currsor_pos == None:
             if i != "e":
                 if self.inventory.items.get_item_by_id(i).type == "b":
+                    self.world.loaded_map[y][x] = self.world.blocks.dirt.id
+                    self.world.get_screen_map()
+                    if self.is_block_colliding(self.screen_pos_x, self.screen_pos_y, self.bottom_collision_points):
+                        self.world.loaded_map[y][x] = self.world.blocks.air.id
+                        self.world.get_screen_map()
+                        return 0
+                    if self.is_block_colliding(self.screen_pos_x, self.screen_pos_y, self.top_collision_points):
+                        self.world.loaded_map[y][x] = self.world.blocks.air.id
+                        self.world.get_screen_map()
+                        return 0
+                    if self.is_block_colliding(self.screen_pos_x, self.screen_pos_y, self.right_collision_points):
+                        self.world.loaded_map[y][x] = self.world.blocks.air.id
+                        self.world.get_screen_map()
+                        return 0
+                    if self.is_block_colliding(self.screen_pos_x, self.screen_pos_y, self.left_collision_points):
+                        self.world.loaded_map[y][x] = self.world.blocks.air.id
+                        self.world.get_screen_map()
+                        return 0
                     self.world.loaded_map[y][x] = self.inventory.items.get_item_by_id(i).type_spesifics.block_id
                     self.inventory.remove_item(self.inventory.hotbar_currsor, 0, 1)
                     self.world.get_screen_map()

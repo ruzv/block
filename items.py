@@ -16,15 +16,17 @@ class block:
 
 class items:
 
-    item_ids = [0, 1]
+    item_ids = [0, 1, 2]
     item_obj = []
 
     def __init__(self):
-        self.dirt =  item(0, "dirt",  "b", block(1), s.dirt_item,  1)
+        self.dirt =  item(0, "dirt",  "b", block(1), s.dirt_item,  20)
         self.stone = item(1, "stone", "b", block(3), s.stone_item, 20)
+        self.sand =  item(2, "sand",  "b", block(5), s.sand_item,  20)
 
         self.item_obj.append(self.dirt)
         self.item_obj.append(self.stone)
+        self.item_obj.append(self.sand)
 
     def get_item_by_id(self, id):
         i = self.item_ids.index(id)

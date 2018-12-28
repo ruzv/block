@@ -13,21 +13,29 @@ class block:
 
 class blocks:
     
-    block_ids = [0, 1, 2, 3, 4]
+    block_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     block_obj = []
 
     def __init__(self):
-        self.air =    block(0, "air",    s.air,   False, False, None)
-        self.dirt =   block(1, "dirt",   s.dirt,  True,  True,  [0, 1])
-        self.grass =  block(2, "grass",  s.grass, True,  True,  [0, 1])
-        self.stone =  block(3, "stone",  s.stone, False, True,  [1, 1])
-        self.border = block(4, "border", s.air,   False, True,  None)
+        self.air =         block(0, "air",         s.air,         False, False, None)
+        self.dirt =        block(1, "dirt",        s.dirt,        True,  True,  [0, 1])
+        self.grass =       block(2, "grass",       s.grass,       True,  True,  [0, 1])
+        self.stone =       block(3, "stone",       s.stone,       False, True,  [1, 1])
+        self.border =      block(4, "border",      s.air,         False, True,  None)
+        self.sand =        block(5, "sand",        s.sand,        True,  True,  [2, 1])
+        self.tree_leafes = block(6, "tree leafes", s.tree_leafes, True,  True,  None)
+        self.tree_stump =  block(7, "tree stump",  s.tree_stump,  True,  True,  None)
+        self.water =       block(8, "water",       s.water,       True,  False, None)
 
         self.block_obj.append(self.air)
         self.block_obj.append(self.dirt)
         self.block_obj.append(self.grass)
         self.block_obj.append(self.stone)
         self.block_obj.append(self.border)
+        self.block_obj.append(self.sand)
+        self.block_obj.append(self.tree_leafes)
+        self.block_obj.append(self.tree_stump)
+        self.block_obj.append(self.water)
 
     def get_block_by_id(self, id):
         i = self.block_ids.index(id)

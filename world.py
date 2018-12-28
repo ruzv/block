@@ -7,8 +7,46 @@ random.seed(1)
 
 class generate:
 
+    small_tree = [[6], 
+                  [7]]
+    medium_tree = [[6], 
+                   [7], 
+                   [7]]
+    big_tree = [[6], 
+                [7], 
+                [7], 
+                [7]]
+
     def __init__(self, world):
         self.world = world
+        self.biomes = []
+
+        self.biomes.append(self.gen_forest)
+        self.biomes.append(self.gen_feeld)
+
+    def generate(self):
+        i = random.randint(0, len(self.biomes)-1)
+        return self.biomes[i]()
+    
+    def gen_forest(self):
+        map = self.fill(32, 90, self.world.blocks.air.id)
+
+        self.fill_random(map, 18, 19, self.world.blocks.grass.id, 95)
+        self.fill_random(map, 19, 28, self.world.blocks.dirt.id, 95)
+        self.fill_random(map, 28, 89, self.world.blocks.stone.id, 70)
+        self.fill_random(map, 28, 35, self.world.blocks.sand.id, 10)
+
+        self.row(map, 0, self.world.blocks.border.id)
+        self.row(map, 89, self.world.blocks.border.id)
+
+        for i in range(10):
+            self.world.gravity(map)
+        for i in range(10):
+            self.world.update_grass(map)
+
+        self.add_trees(map, 100)
+
+        return map
 
     def gen_plane(self):
         map = []
@@ -24,13 +62,13 @@ class generate:
 
     def gen_feeld(self):
         map = self.fill(32, 90, 0)
-        map = self.fill_random(map, 18, 19, 2, 90)
-        map = self.fill_random(map, 19, 25, 1, 90)
-        map = self.fill_random(map, 25, 90, 3, 70)
+        self.fill_random(map, 18, 19, 2, 90)
+        self.fill_random(map, 19, 25, 1, 90)
+        self.fill_random(map, 25, 90, 3, 70)
         for i in range(10):
             self.world.gravity(map)
-        map = self.row(map, 0, 4)
-        map = self.row(map, 89, 4)
+        self.row(map, 0, 4)
+        self.row(map, 89, 4)
         return map
 
     def fill(self, x, y, block_id):
@@ -44,24 +82,43 @@ class generate:
 
     def row(self, map, y, block_id):
         map[y] = [block_id for i in range(len(map[0]))]
-        return map
 
     def collumn(self, map, x, block_id):
         for i in range(len(map)):
             map[i][x] = block_id
-        return map
 
     def fill_random(self, map, y1, y2, block_id, chance):
         for i in range(y1, y2):
-            l = []
             for k in range(len(map[0])):
                 if random.randint(1, 100) <= chance:
-                    l.append(block_id)
+                    map[i][k] = block_id
+
+    def add_structure(self, map, x, y, structure):
+        for yi in range(len(structure)):
+            for xi in range(len(structure[0])):
+                if structure[yi][xi] != "t":
+                    map[y+yi][x+xi] = structure[yi][xi]
+
+    def add_trees(self, map, chance):
+        r = 0
+        for y in range(5, len(map)):
+            for x in range(len(map[0])):
+                if map[y][x] == self.world.blocks.grass.id:
+                    r += 1
                 else:
-                    l.append(0)
-            map[i] = l
-        return map
-            
+                    r = 0
+                if r == 2:
+                    if random.randint(1, 100) <= chance:
+                        t = random.randint(1, 3)
+                        if t == 1:
+                            sturct = self.small_tree
+                        elif t == 2:
+                            sturct = self.medium_tree
+                        elif t == 3:
+                            sturct = self.big_tree
+                        self.add_structure(map, x+random.randint(0, 1), y-t-1, sturct)
+                    r = 0
+                
 
 class world:
 
@@ -74,6 +131,7 @@ class world:
     screen_map_draw_offset_x = 0
     screen_map_draw_offset_y = 0
 
+    world_update_count = 1
     loaded_map = [[] for i in range(90)]
     screen_map = []
 
@@ -114,7 +172,7 @@ class world:
         if os.path.exists("saves/"+str(self.active_chunk_id-3)+"_chunk-blocks"):
             map = self.load_chunk(self.active_chunk_id-3)
         else:
-            map = self.generator.gen_feeld()
+            map = self.generator.generate()
         # insert new chunk
         for i in range(90):
             self.loaded_map[i] = map[i] + self.loaded_map[i]
@@ -135,7 +193,7 @@ class world:
         if os.path.exists("saves/"+str(self.active_chunk_id+3)+"_chunk-blocks"):
             map = self.load_chunk(self.active_chunk_id+3)
         else:
-            map = self.generator.gen_feeld()
+            map = self.generator.generate()
         # insert new chunk
         for i in range(90):
             self.loaded_map[i] += map[i]
@@ -171,7 +229,7 @@ class world:
             if os.path.exists("saves/"+str(self.active_chunk_id+i)+"_chunk-blocks"):
                 l = self.load_chunk(self.active_chunk_id+i)
             else:
-                l = self.generator.gen_feeld()
+                l = self.generator.generate()
             for k in range(90):
                 self.loaded_map[k] += l[k]
 
@@ -189,12 +247,40 @@ class world:
                 l.append(self.loaded_map[y+y_pos][x+x_pos])
             self.screen_map.append(l)
 
+    def update_grass(self, map):
+        spread = []
+        for y in range(1, len(map)-1):
+            for x in range(0, len(map[0])):
+                if map[y][x] == self.blocks.grass.id:
+                    # dacay
+                    if map[y-1][x] != self.blocks.air.id and map[y-1][x] != self.blocks.tree_stump.id:
+                        map[y][x] = self.blocks.dirt.id
+                    else: # spread
+                        if x != 0:
+                            if map[y][x-1] == self.blocks.dirt.id and map[y-1][x-1] == self.blocks.air.id:
+                                spread.append([x-1, y])
+                        if x != len(map[0])-1:
+                            if map[y][x+1] == self.blocks.dirt.id and map[y-1][x+1] == self.blocks.air.id:
+                                spread.append([x+1, y])
+        for i in spread:
+            map[i[1]][i[0]] = self.blocks.grass.id
+
     def gravity(self, map):
         for x in range(len(map[0])):
-            for y in reversed(range(len(map)-1)):
-                if self.blocks.get_block_by_id(map[y][x]).has_gravity and map[y+1][x] == 0:
-                    map[y+1][x] = map[y][x]
-                    map[y][x] = 0
+            for y in reversed(range(1, len(map)-1)):
+                if self.blocks.get_block_by_id(map[y][x]).has_gravity and  not self.blocks.get_block_by_id(map[y+1][x]).is_solid:
+                    map[y+1][x], map[y][x] = map[y][x], map[y+1][x]
+    
+    def update(self):
+        self.world_update_count += 1
+        if self.world_update_count%10 == 0:
+            self.gravity(self.loaded_map)
+            self.get_screen_map()
+        if self.world_update_count%120 == 0:
+            self.update_grass(self.loaded_map)
+            self.get_screen_map()
+            self.world_update_count = 1
+
 
     def draw(self):
         for y in range(19):
