@@ -35,6 +35,13 @@ class inventory:
                 self.inventory_item_ids[i] = item_id
                 self.inventory_item_amounts[i] = 1
                 return None
+    
+    def remove_item(self, x, y, amount):
+        i = (y*5)+x
+        self.inventory_item_amounts[i] -= amount
+        if self.inventory_item_amounts[i] <= 0:
+            self.inventory_item_amounts[i] = 0
+            self.inventory_item_ids[i] = "e"
 
     def pick_up_item(self):
         if self.is_inventory_open:
@@ -42,19 +49,19 @@ class inventory:
                 i = (self.inventory_currsor_y*5) + self.inventory_currsor_x+5
             elif self.inventory_currsor_pos == "h":
                 i = self.inventory_currsor_x
-
-            if self.inventory_item_ids[i] == self.pick_up_item_id and self.pick_up_item_id != "e":
-                self.inventory_item_amounts[i] += self.pick_up_item_amount
-                ms = self.items.get_item_by_id(self.pick_up_item_id).max_stack
-                if self.inventory_item_amounts[i] > ms:
-                    self.pick_up_item_amount = self.inventory_item_amounts[i] - ms
-                    self.inventory_item_amounts[i] = ms
+            if self.inventory_currsor_pos != None:
+                if self.inventory_item_ids[i] == self.pick_up_item_id and self.pick_up_item_id != "e":
+                    self.inventory_item_amounts[i] += self.pick_up_item_amount
+                    ms = self.items.get_item_by_id(self.pick_up_item_id).max_stack
+                    if self.inventory_item_amounts[i] > ms:
+                        self.pick_up_item_amount = self.inventory_item_amounts[i] - ms
+                        self.inventory_item_amounts[i] = ms
+                    else:
+                        self.pick_up_item_id = "e"
+                        self.pick_up_item_amount = 0
                 else:
-                    self.pick_up_item_id = "e"
-                    self.pick_up_item_amount = 0
-            else:
-                self.inventory_item_ids[i], self.pick_up_item_id = self.pick_up_item_id, self.inventory_item_ids[i]
-                self.inventory_item_amounts[i], self.pick_up_item_amount = self.pick_up_item_amount, self.inventory_item_amounts[i]
+                    self.inventory_item_ids[i], self.pick_up_item_id = self.pick_up_item_id, self.inventory_item_ids[i]
+                    self.inventory_item_amounts[i], self.pick_up_item_amount = self.pick_up_item_amount, self.inventory_item_amounts[i]
 
     def update(self):
         if self.is_inventory_open:
@@ -201,8 +208,19 @@ class player:
         d = self.world.blocks.get_block_by_id(self.world.loaded_map[y][x]).break_dorps
         if d != None:
             self.inventory.add_item(d[0], d[1])
-        self.world.loaded_map[y][x] = 0
+        self.world.loaded_map[y][x] = self.world.blocks.air.id
         self.world.get_screen_map()
+
+    def place_block(self):
+        x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
+        y = int((self.world.screen_map_pos_y+self.currsor_pos_y)/40)
+        i = self.inventory.inventory_item_ids[self.inventory.hotbar_currsor]
+        if self.world.loaded_map[y][x] == self.world.blocks.air.id and self.inventory.inventory_currsor_pos == None:
+            if i != "e":
+                if self.inventory.items.get_item_by_id(i).type == "b":
+                    self.world.loaded_map[y][x] = self.inventory.items.get_item_by_id(i).type_spesifics.block_id
+                    self.inventory.remove_item(self.inventory.hotbar_currsor, 0, 1)
+                    self.world.get_screen_map()
 
     def is_block_colliding(self, x, y, collision_points):
         collision = False

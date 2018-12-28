@@ -61,6 +61,7 @@ def event_handler():
                 que.append("l_mouse")
             if p[2] == 1:
                 player.inventory.pick_up_item()
+                player.place_block()
 
         if event.type == pygame.MOUSEBUTTONUP:
             p = pygame.mouse.get_pressed()
