@@ -63,7 +63,7 @@ def hotbar_currsor(x, y, surface):
 
 def dirt_item(x, y, surface, amount):
     t = font.render(str(amount), True, (0, 0, 0))
-    pygame.draw.rect(surface, (77, 40, 0), [x, y, 30, 30])
+    pygame.draw.rect(surface, (79, 60, 42), [x, y, 30, 30])
     surface.blit(t, [x+20, y+20])
 
 def stone_item(x, y, surface, amount):
