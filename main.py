@@ -90,8 +90,8 @@ def event_handler():
     if "l_mouse" in que:
         player.start_block_breaking()
     else:
-        player.is_block_breaking = False
-    
+        player.stop_block_breaking()
+
     print(que)
 
 def update():
@@ -106,6 +106,7 @@ def draw():
     player.draw()
     player.draw_cursor()
     player.inventory.draw()
+    player.draw_block_breaking_progress_bar()
 
     pygame.display.update()
 

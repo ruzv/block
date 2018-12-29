@@ -169,6 +169,7 @@ class player:
 
     is_block_breaking = False
     block_breaking_progress = 0
+    block_breaking_hotbar_progress = 0
     block_breaking_x = 0
     block_breaking_y = 0
 
@@ -209,35 +210,34 @@ class player:
             self.currsor_pos_y = (math.sin(a)*d)+self.screen_pos_y+20
 
     def start_block_breaking(self):
-        if not self.is_block_breaking:
-            self.block_breaking_progress = 0
         self.is_block_breaking = True
-        self.block_breaking_x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
-        self.block_breaking_y = int((self.world.screen_map_pos_y+self.currsor_pos_y)/40)
+        x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
+        y = int((self.world.screen_map_pos_y+self.currsor_pos_y)/40)
+        if self.block_breaking_x != x or self.block_breaking_y != y:
+            self.block_breaking_progress = 0
+            self.block_breaking_x = x
+            self.block_breaking_y = y
+
+    def stop_block_breaking(self):
+        self.is_block_breaking = False
+        self.block_breaking_hotbar_progress = 0
+        self.block_breaking_progress = 0
 
     def break_block(self):
         if self.is_block_breaking:
-            x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
-            y = int((self.world.screen_map_pos_y+self.currsor_pos_y)/40)
-            if self.block_breaking_x == x and self.block_breaking_y == y:
-                b = self.world.blocks.get_block_by_id(self.world.loaded_map[y][x])
-                if b.hardness != "inf":
-                    print(self.block_breaking_progress)
-                    if b.hardness <= self.block_breaking_progress:
-                        d = b.break_dorps
-                        if d != None:
-                            self.inventory.add_item(d[0], d[1])
-                        self.world.loaded_map[self.block_breaking_y][self.block_breaking_x] = self.world.blocks.air.id
-                        self.world.get_screen_map()
-                        self.is_block_breaking = False
+            b = self.world.blocks.get_block_by_id(self.world.loaded_map[self.block_breaking_y][self.block_breaking_x])
+            if b.hardness != "inf":
+                self.block_breaking_hotbar_progress = (self.block_breaking_progress/b.hardness)*100
+                if b.hardness <= self.block_breaking_progress:
+                    d = b.break_dorps
+                    if d != None:
+                        self.inventory.add_item(d[0], d[1])
+                    self.world.loaded_map[self.block_breaking_y][self.block_breaking_x] = self.world.blocks.air.id
+                    self.world.get_screen_map()
+                    self.stop_block_breaking()
                 self.block_breaking_progress += 1
             else:
-                self.is_block_breaking = False
-        # d = self.world.blocks.get_block_by_id(self.world.loaded_map[y][x]).break_dorps
-        # if d != None:
-        #     self.inventory.add_item(d[0], d[1])
-        # self.world.loaded_map[y][x] = self.world.blocks.air.id
-        # self.world.get_screen_map()
+                self.stop_block_breaking()
 
     def place_block(self):
         x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
@@ -379,6 +379,9 @@ class player:
 
     def draw_cursor(self):
         pygame.draw.line(self.surface, (0, 0, 0), [self.screen_pos_x+20, self.screen_pos_y+20], [self.currsor_pos_x, self.currsor_pos_y], 4)
+
+    def draw_block_breaking_progress_bar(self):
+        s.block_breaking_progress_bar(1160, 680, self.surface, self.block_breaking_hotbar_progress)
 
     def draw(self):
         s.player(self.screen_pos_x, self.screen_pos_y, self.surface)
