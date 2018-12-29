@@ -88,7 +88,9 @@ def event_handler():
         pass
 
     if "l_mouse" in que:
-        player.break_block()
+        player.start_block_breaking()
+    else:
+        player.is_block_breaking = False
     
     print(que)
 

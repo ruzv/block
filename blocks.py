@@ -3,13 +3,14 @@ import sprites as s
 
 class block:
     
-    def __init__(self, id, name, sprite, has_gravity, is_solid, break_dorps):
+    def __init__(self, id, name, sprite, has_gravity, is_solid, break_dorps, hardness):
         self.id = id
         self.name = name
         self.sprite = sprite
         self.has_gravity = has_gravity
         self.is_solid = is_solid
         self.break_dorps = break_dorps
+        self.hardness = hardness
 
 class blocks:
     
@@ -17,15 +18,15 @@ class blocks:
     block_obj = []
 
     def __init__(self):
-        self.air =         block(0, "air",         s.air,         False, False, None)
-        self.dirt =        block(1, "dirt",        s.dirt,        True,  True,  [0, 1])
-        self.grass =       block(2, "grass",       s.grass,       True,  True,  [0, 1])
-        self.stone =       block(3, "stone",       s.stone,       False, True,  [1, 1])
-        self.border =      block(4, "border",      s.air,         False, True,  None)
-        self.sand =        block(5, "sand",        s.sand,        True,  True,  [2, 1])
-        self.tree_leafes = block(6, "tree leafes", s.tree_leafes, True,  True,  None)
-        self.tree_stump =  block(7, "tree stump",  s.tree_stump,  True,  True,  None)
-        self.water =       block(8, "water",       s.water,       True,  False, None)
+        self.air =         block(0, "air",         s.air,         False, False, None,   "inf")
+        self.dirt =        block(1, "dirt",        s.dirt,        True,  True,  [0, 1], 20)
+        self.grass =       block(2, "grass",       s.grass,       True,  True,  [0, 1], 20)
+        self.stone =       block(3, "stone",       s.stone,       False, True,  [1, 1], 20)
+        self.border =      block(4, "border",      s.air,         False, True,  None,   "inf")
+        self.sand =        block(5, "sand",        s.sand,        True,  True,  [2, 1], 20)
+        self.tree_leafes = block(6, "tree leafes", s.tree_leafes, True,  True,  None,   20)
+        self.tree_stump =  block(7, "tree stump",  s.tree_stump,  True,  True,  None,   20)
+        self.water =       block(8, "water",       s.water,       True,  False, None,   20)
 
         self.block_obj.append(self.air)
         self.block_obj.append(self.dirt)

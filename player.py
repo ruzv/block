@@ -167,6 +167,12 @@ class player:
     is_jumping = False
     jump_height = 20
 
+    is_block_breaking = False
+    block_breaking_progress = 0
+    block_breaking_x = 0
+    block_breaking_y = 0
+
+
     def __init__(self, surface, world):
         self.surface = surface
         self.world = world
@@ -202,14 +208,36 @@ class player:
             self.currsor_pos_x = (math.cos(a)*d)+self.screen_pos_x+20
             self.currsor_pos_y = (math.sin(a)*d)+self.screen_pos_y+20
 
+    def start_block_breaking(self):
+        if not self.is_block_breaking:
+            self.block_breaking_progress = 0
+        self.is_block_breaking = True
+        self.block_breaking_x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
+        self.block_breaking_y = int((self.world.screen_map_pos_y+self.currsor_pos_y)/40)
+
     def break_block(self):
-        x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
-        y = int((self.world.screen_map_pos_y+self.currsor_pos_y)/40)
-        d = self.world.blocks.get_block_by_id(self.world.loaded_map[y][x]).break_dorps
-        if d != None:
-            self.inventory.add_item(d[0], d[1])
-        self.world.loaded_map[y][x] = self.world.blocks.air.id
-        self.world.get_screen_map()
+        if self.is_block_breaking:
+            x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
+            y = int((self.world.screen_map_pos_y+self.currsor_pos_y)/40)
+            if self.block_breaking_x == x and self.block_breaking_y == y:
+                b = self.world.blocks.get_block_by_id(self.world.loaded_map[y][x])
+                if b.hardness != "inf":
+                    print(self.block_breaking_progress)
+                    if b.hardness <= self.block_breaking_progress:
+                        d = b.break_dorps
+                        if d != None:
+                            self.inventory.add_item(d[0], d[1])
+                        self.world.loaded_map[self.block_breaking_y][self.block_breaking_x] = self.world.blocks.air.id
+                        self.world.get_screen_map()
+                        self.is_block_breaking = False
+                self.block_breaking_progress += 1
+            else:
+                self.is_block_breaking = False
+        # d = self.world.blocks.get_block_by_id(self.world.loaded_map[y][x]).break_dorps
+        # if d != None:
+        #     self.inventory.add_item(d[0], d[1])
+        # self.world.loaded_map[y][x] = self.world.blocks.air.id
+        # self.world.get_screen_map()
 
     def place_block(self):
         x = int((self.world.screen_map_pos_x+self.currsor_pos_x)/40)
@@ -342,6 +370,8 @@ class player:
         self.gravity()
         self.jumping()
         self.move_horizontaly()
+
+        self.break_block()
 
         self.inventory.update()
 
