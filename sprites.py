@@ -81,3 +81,16 @@ def sand_item(x, y, surface, amount):
     t = font.render(str(amount), True, (0, 0, 0))
     pygame.draw.rect(surface, (200, 200, 0), [x, y, 30, 30])
     surface.blit(t, [x+20, y+20])
+
+def wood_pickaxe_item(x, y, surface, amount):
+    #122, 77, 31
+    pygame.draw.rect(surface, (122, 77, 31), [x+8, y, 6, 30])
+    pygame.draw.rect(surface, (81, 51, 21), [x+3, y, 18, 3])
+    pygame.draw.rect(surface, (81, 51, 21), [x+3, y+3, 24, 3])
+
+# tools
+
+def wood_pickaxe_tool(x, y, surface):
+    pygame.draw.rect(surface, (122, 77, 31), [x, y, 8, -60])
+    pygame.draw.rect(surface, (81, 51, 21), [x-4, y-50, 18, -8])
+    pygame.draw.rect(surface, (81, 51, 21), [x+14, y-50, 8, -4])

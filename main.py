@@ -4,13 +4,18 @@ import world as w
 import player as p
 
 
+# setup pygame (display, caption, clock)
 pygame.init()
 display = pygame.display.set_mode([1280, 720])
 pygame.display.set_caption("7_day_chalange")
 clock = pygame.time.Clock()
 
+# init player, world
 world = w.world(display)
 player = p.player(display, world)
+
+# give player a wood pickaxe
+player.inventory.add_item(3, 1)
 
 que = []    
 max_que_len = 4

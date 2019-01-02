@@ -12,12 +12,14 @@ class inventory:
 
     inventory_currsor_x = 0
     inventory_currsor_y = 0
-    is_inventory_open = False
     inventory_currsor_pos = None
+    is_inventory_open = False
 
+    # item in cursors slot
     pick_up_item_id = "e"
     pick_up_item_amount = 0
 
+    # pos of hotbar_cursor
     hotbar_currsor = 0
 
     def __init__(self, surface, items):
@@ -43,6 +45,7 @@ class inventory:
             self.inventory_item_amounts[i] = 0
             self.inventory_item_ids[i] = "e"
 
+    # pick up or release item from or in currsor slot
     def pick_up_item(self):
         if self.is_inventory_open:
             if self.inventory_currsor_pos == "i":
@@ -63,6 +66,7 @@ class inventory:
                     self.inventory_item_ids[i], self.pick_up_item_id = self.pick_up_item_id, self.inventory_item_ids[i]
                     self.inventory_item_amounts[i], self.pick_up_item_amount = self.pick_up_item_amount, self.inventory_item_amounts[i]
 
+    # gets the cusor pos and x, y
     def update(self):
         if self.is_inventory_open:
             mx, my = pygame.mouse.get_pos()
@@ -182,22 +186,26 @@ class player:
         self.get_screen_pos()
         self.get_cursor_pos()
 
+    # for drawing
     def get_screen_pos(self):
         self.screen_pos_x = self.global_pos_x-self.world.global_screen_pos_x
         self.screen_pos_y = self.global_pos_y-self.world.global_screen_pos_y
 
+    # returns the angle between two points
     def get_angle(self, x1, y1, x2, y2):
         x = x2 - x1
         y = -(y2 - y1)
         a = math.atan2(y, x)
         return -a
 
+    # dist between two points
     def get_distance(self, x1, y1, x2, y2):
         x = x2 - x1
         y = y2 - y1
         d = math.sqrt((x**2)+(y**2))
         return d
 
+    # gets the onscreen currsor pos
     def get_cursor_pos(self):
         mpx, mpy = pygame.mouse.get_pos()
         a = self.get_angle(self.screen_pos_x+20, self.screen_pos_y+20, mpx, mpy)
@@ -248,6 +256,7 @@ class player:
                 if self.inventory.items.get_item_by_id(i).type == "b":
                     self.world.loaded_map[y][x] = self.world.blocks.dirt.id
                     self.world.get_screen_map()
+                    # checks if dest pos not coliding with player
                     if self.is_block_colliding(self.screen_pos_x, self.screen_pos_y, self.bottom_collision_points):
                         self.world.loaded_map[y][x] = self.world.blocks.air.id
                         self.world.get_screen_map()
@@ -268,6 +277,7 @@ class player:
                     self.inventory.remove_item(self.inventory.hotbar_currsor, 0, 1)
                     self.world.get_screen_map()
 
+    # checks players colision with blocks at x, y
     def is_block_colliding(self, x, y, collision_points):
         collision = False
         for p in collision_points:
@@ -312,6 +322,7 @@ class player:
                 self.is_moving_left = False
                 self.get_screen_pos()
 
+    # checks for start of gravity. if so inits grav
     def is_falling(self):
         if not self.is_block_colliding(self.screen_pos_x, self.screen_pos_y+1, self.bottom_collision_points):
             if not self.is_gravity and not self.is_jumping:

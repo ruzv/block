@@ -7,6 +7,7 @@ random.seed(1)
 
 class generate:
 
+    # stuctures
     small_tree = [[6], 
                   [7]]
     medium_tree = [[6], 
@@ -19,15 +20,19 @@ class generate:
 
     def __init__(self, world):
         self.world = world
+
+        # list of what to pick different biomes for world gen
         self.biomes = []
 
         self.biomes.append(self.gen_forest)
         self.biomes.append(self.gen_feeld)
 
+    # generates a random biome from self.biomes
     def generate(self):
         i = random.randint(0, len(self.biomes)-1)
         return self.biomes[i]()
     
+    # forest biome
     def gen_forest(self):
         map = self.fill(32, 90, self.world.blocks.air.id)
 
@@ -48,6 +53,7 @@ class generate:
 
         return map
 
+    # plane biome (test site)
     def gen_plane(self):
         map = []
         for y in range(90):
@@ -60,6 +66,7 @@ class generate:
         map = self.row(map, 89, 4)
         return map
 
+    # feeld biome
     def gen_feeld(self):
         map = self.fill(32, 90, 0)
         self.fill_random(map, 18, 19, 2, 90)
@@ -71,6 +78,10 @@ class generate:
         self.row(map, 89, 4)
         return map
 
+    # functions for world gen
+
+    # creats a new map with dims x, y filled with block_id
+    # used for map initalization(filling with air)
     def fill(self, x, y, block_id):
         map = []
         for yi in range(y):
@@ -80,25 +91,30 @@ class generate:
             map.append(l)
         return map
 
+    # fills maps row y with block_id
     def row(self, map, y, block_id):
         map[y] = [block_id for i in range(len(map[0]))]
 
+    # fills maps collumn x with block_id
     def collumn(self, map, x, block_id):
         for i in range(len(map)):
             map[i][x] = block_id
 
+    # fills randomly with block_id maps collums form y1 to y2
     def fill_random(self, map, y1, y2, block_id, chance):
         for i in range(y1, y2):
             for k in range(len(map[0])):
                 if random.randint(1, 100) <= chance:
                     map[i][k] = block_id
 
+    # adds stuture to map at x, y
     def add_structure(self, map, x, y, structure):
         for yi in range(len(structure)):
             for xi in range(len(structure[0])):
                 if structure[yi][xi] != "t":
                     map[y+yi][x+xi] = structure[yi][xi]
 
+    # cheks for treen spawn sites in map and ads trees
     def add_trees(self, map, chance):
         r = 0
         for y in range(5, len(map)):
@@ -122,16 +138,22 @@ class generate:
 
 class world:
 
+    # screens coners global pos
     global_screen_pos_x = 0
     global_screen_pos_y = 40
+    # the chunk that the player is in
     active_chunk_id = 0
 
+    # screens pos in loaded_map
     screen_map_pos_x = 2560
     screen_map_pos_y = 40
+
     screen_map_draw_offset_x = 0
     screen_map_draw_offset_y = 0
 
+    # the clock count of world updates
     world_update_count = 1
+
     loaded_map = [[] for i in range(90)]
     screen_map = []
 
@@ -143,6 +165,7 @@ class world:
         self.get_loaded_map()
         self.get_screen_map()
 
+    # to file
     def save_chunk(self, chunk, id):
         file = open("saves/"+str(id)+"_chunk-blocks", "w")
         for r in chunk:
@@ -150,6 +173,7 @@ class world:
                 file.write(str(b)+"\n")
         file.close()
     
+    # from file
     def load_chunk(self, id):
         file = open("saves/"+str(id)+"_chunk-blocks", "r")
         chunk = []
@@ -176,8 +200,6 @@ class world:
         # insert new chunk
         for i in range(90):
             self.loaded_map[i] = map[i] + self.loaded_map[i]
-            # for k in reversed(range(32)):
-            #     self.loaded_map[i].insert(0, map[i][k])
         # reset screen pos
         self.active_chunk_id -= 1
         self.screen_map_pos_x += 1280
@@ -201,8 +223,8 @@ class world:
         self.active_chunk_id += 1
         self.screen_map_pos_x -= 1290
 
+    # updates screen_maps pos'es
     def move_screen_map(self, dx, dy):
-        
         if self.screen_map_pos_y+dy < 40:
             self.screen_map_pos_y = 40
             self.global_screen_pos_y = 40
@@ -216,6 +238,7 @@ class world:
         self.screen_map_pos_x += dx
         self.global_screen_pos_x += dx
 
+        # check if out of active_chunk
         if self.screen_map_pos_x < 2560:
             self.load_left_chunk()
         elif self.screen_map_pos_x > 3840:
@@ -223,7 +246,7 @@ class world:
 
         self.get_screen_map()
 
-
+    # at world init
     def get_loaded_map(self):
         for i in range(-2, 3):
             if os.path.exists("saves/"+str(self.active_chunk_id+i)+"_chunk-blocks"):
@@ -233,6 +256,7 @@ class world:
             for k in range(90):
                 self.loaded_map[k] += l[k]
 
+    # gets screen_map_ofsets and pos
     def get_screen_map(self):
         x_pos = int(self.screen_map_pos_x/40)
         y_pos = int(self.screen_map_pos_y/40)
@@ -265,12 +289,14 @@ class world:
         for i in spread:
             map[i[1]][i[0]] = self.blocks.grass.id
 
+    # block gravity
     def gravity(self, map):
         for x in range(len(map[0])):
             for y in reversed(range(1, len(map)-1)):
                 if self.blocks.get_block_by_id(map[y][x]).has_gravity and  not self.blocks.get_block_by_id(map[y+1][x]).is_solid:
                     map[y+1][x], map[y][x] = map[y][x], map[y+1][x]
     
+    # world updates
     def update(self):
         self.world_update_count += 1
         if self.world_update_count%10 == 0:
@@ -279,6 +305,7 @@ class world:
         if self.world_update_count%120 == 0:
             self.update_grass(self.loaded_map)
             self.get_screen_map()
+            # reset count
             self.world_update_count = 1
 
 
